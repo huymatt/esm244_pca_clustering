@@ -7,4 +7,32 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggfortify) # For PCA biplot
+library(patchwork)
+library(here)
+library(janitor)
+
 ```
+
+### Read in data for PCA
+
+For this principal components analysis, I will be using country-level data on various environmental and climate variables. These variables include climate and weather data such as temperature, precipitation, and cloud cover, as well as environmental data on cropland, tree cover, and various geographical characteristics. The data was compiled on Kaggle by @zander_venter using publicly available remote sensing data in Google Earth Engine, derived mostly using the means for each country at a scale of about 10km.
+
+```{r}
+world_env_data <- read_csv(here("data/world_env_vars.csv")) |>
+  drop_na() |>
+  clean_names()
+
+world_env_pca <- world_env_data |>
+  select(where(is.numeric)) |> ### select all numeric columns for PCA, dropping country column
+  scale() |> #scale all values to mean = 0, sd = 1
+  prcomp()
+
+# See the loadings (weighting for each principal component)
+world_env_pca$rotation
+```
+
+
+###
+
