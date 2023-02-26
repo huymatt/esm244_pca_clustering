@@ -1,0 +1,30 @@
+---
+title: "\"Homework 3 Task 2 - Hierarchical Clustering"
+author: "Matthieu Huy"
+date: "2023-02-26"
+output: html_document
+---
+
+```{r setup, echo = TRUE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(janitor)
+
+# Packages for cluster analysis:
+
+library(NbClust)
+library(cluster)
+library(factoextra)
+library(dendextend)
+library(ggdendro)
+```
+
+### Read in data
+
+```{r}
+stream_data <- read_csv(here("data/sbc_lter_registered_stream_chemistry.csv")) |>
+  clean_names() |> 
+  replace(stream_data == -999, NA) #replace all -999 values with NA
+  
+```
+
