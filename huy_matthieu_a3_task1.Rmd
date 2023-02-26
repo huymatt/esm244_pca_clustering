@@ -26,6 +26,7 @@ world_env_data <- read_csv(here("data/world_env_vars.csv")) |>
 
 world_env_pca <- world_env_data |>
   select(where(is.numeric)) |> ### select all numeric columns for PCA, dropping country column
+  #select(country, accessibility_to_cities, cropland_cover, tree_canopy_cover, rain_mean_annual, #temp_mean_annual, temp_annual_range, rain_wettest_quart, rain_driest_quart, temp_max = #temp_max_warmest_month, temp_min_coldest_month)
   scale() |> #scale all values to mean = 0, sd = 1
   prcomp()
 
@@ -33,6 +34,36 @@ world_env_pca <- world_env_data |>
 world_env_pca$rotation
 ```
 
+### Create a Biplot with loadings
+```{r}
+autoplot(world_env_pca,
+     	data = world_env_data,
+     	loadings = TRUE,
+     	loadings.label = TRUE,
+     	loadings.colour = "black",
+     	loadings.label.colour = "black",
+     	loadings.label.vjust = -0.5
+     	) +
+  theme_minimal()
 
-###
+### categorize countries somehow
+### add scale_color_manual with new categories
+### how to decide which variables to include in order to make PCA less cluttered?
 
+#  scale_color_manual(values = c('red', 'orange', 'yellowgreen', 'darkgreen')) +
+#  scale_fill_manual(values = c('red', 'orange', 'yellowgreen', 'darkgreen')) +
+#  theme_minimal()
+```
+
+### Screeplot
+
+```{r}
+screeplot(world_env_pca, type = "lines")
+screeplot(world_env_pca, type = "barplot")
+```
+
+### Notes 
+
+- Need to add caption to plots
+- Need to decide which variables to leave in the Biplot
+- Need to provide explanation/analysis summary
