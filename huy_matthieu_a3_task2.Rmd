@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(tidyverse)
 library(janitor)
+library(here)
 
 # Packages for cluster analysis:
 
@@ -23,8 +24,47 @@ library(ggdendro)
 
 ```{r}
 stream_data <- read_csv(here("data/sbc_lter_registered_stream_chemistry.csv")) |>
-  clean_names() |> 
-  replace(stream_data == -999, NA) #replace all -999 values with NA
+  clean_names() |>
+  group_by(site_code) |>
+  summarise_at(vars(-timestamp_local), c(mean = "mean"), na.rm = TRUE)
+
+
+stream_data[stream_data== -999] <- NA #replace all -999 values with NA
   
+### summary(stream_data) shows that we need to scale data
+
+stream_scaled <- stream_data |>
+  select(where(is.numeric)) |>
+  scale()
+
+rownames(stream_scaled) <- stream_data$site_code
+
+# summary(stream_scaled)
 ```
 
+```{r}
+### Compute Euclidean distances:
+euc_distance <- dist(stream_scaled, 
+                     method = "euclidean") ### add diag and upper
+
+### Check out the output:
+# euc_distance
+```
+
+```{r}
+# Hierarchical clustering (complete linkage)
+hc_complete <- hclust(euc_distance, method = "complete" )
+
+# Plot:
+ggdendrogram(hc_complete, 
+             rotate = FALSE) +
+  theme_minimal() +
+  labs(x = "Site Code")
+# y - euclidian distance
+# COOL. Then you can customize w/ usual ggplot tools. 
+```
+
+### Notes 
+
+- Need to add caption to plot
+- Need to provide explanation/analysis summary
