@@ -20,24 +20,38 @@ library(dendextend)
 library(ggdendro)
 ```
 
-### Read in data
+### Read in data and deal with NA values
 
 ```{r}
 stream_data <- read_csv(here("data/sbc_lter_registered_stream_chemistry.csv")) |>
-  clean_names() |>
+  clean_names()
+
+summary(stream_data) 
+#tpc_u_m, tpn_u_m, tpp_u_m, and tss_mgper_liter columns have median = -999
+#indicating >50% of col is NA
+
+stream_data[stream_data== -999] <- NA #replace all -999 values with NA
+
+colSums(is.na(stream_data)) 
+#cols [td_u_m:tss_mgper_liter] have > 5000, or 25% of values as NA
+
+```
+
+For the purpose of this analysis, we will use a 50% threshold to remove columns with a lot of NA values from our data, assuming that these variables are not statistically important. 
+
+```{r}
+stream_means <- stream_data |>
+  select(-c(tpc_u_m:tss_mgper_liter)) |> #exclude cols where >50% of values are NA
   group_by(site_code) |>
   summarise_at(vars(-timestamp_local), c(mean = "mean"), na.rm = TRUE)
 
-
-stream_data[stream_data== -999] <- NA #replace all -999 values with NA
-  
 ### summary(stream_data) shows that we need to scale data
 
-stream_scaled <- stream_data |>
+stream_scaled <- stream_means |>
   select(where(is.numeric)) |>
   scale()
 
-rownames(stream_scaled) <- stream_data$site_code
+rownames(stream_scaled) <- stream_means$site_code
 
 # summary(stream_scaled)
 ```
